@@ -198,18 +198,29 @@
             android:title="@string/pref_text_area_size_title"
             android:summary="@string/pref_text_area_size_summary" />
 
-    	<CheckBoxPreference android:key="pref_key_strip_unicode"
-    	    android:title="@string/pref_title_strip_unicode"
-    	    android:summary="@string/pref_summary_strip_unicode"
-    	    android:defaultValue="false" />
-
         <CheckBoxPreference
             android:key="pref_easy_selector"
             android:title="@string/pref_multi_select"
             android:summary="@string/pref_multi_select_summary"
             android:defaultValue="false" />
     </PreferenceCategory>
-    
+
+    <PreferenceCategory android:title="@string/pref_extra_settings">
+        <CheckBoxPreference android:key="pref_key_strip_unicode"
+            android:title="@string/pref_title_strip_unicode"
+            android:summary="@string/pref_summary_strip_unicode"
+            android:defaultValue="false" />
+
+        <com.android.mms.preferences.UserAgentListPreference
+            android:key="pref_key_mms_user_agent"
+            android:defaultValue="default"
+            android:title="@string/pref_title_mms_user_agent"
+            android:summary="@string/pref_summary_mms_user_agent"
+            android:entries="@array/pref_mms_user_agent_entries"
+            android:entryValues="@array/pref_mms_user_agent_values"
+            android:dialogTitle="@string/pref_title_mms_user_agent" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/pref_soft_keyboard_title">
         <ListPreference
             android:key="pref_key_mms_input_type"
