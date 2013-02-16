@@ -128,6 +128,12 @@
 
     <PreferenceCategory android:title="@string/pref_title_quick_reply"
         android:key="category_quick_reply">
+        <CheckBoxPreference
+            android:key="pref_key_quickmessage"
+            android:title="@string/pref_quickmessage_title"
+            android:dependency="pref_key_enable_notifications"
+            android:summary="@string/pref_quickmessage_summary"
+            android:defaultValue="false" />
 
         <CheckBoxPreference
             android:defaultValue="true"

@@ -41,6 +41,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.provider.Telephony.Mms;
 import android.provider.Telephony.Sms;
+import android.telephony.TelephonyManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -971,6 +972,9 @@ public class MessagingNotification {
 
         final Notification notification;
 
+        // See if QuickMessage pop-up support is enabled in preferences
+        boolean qmPopupEnabled = MessagingPreferenceActivity.getQuickMessageEnabled(context);
+
         // make an intent to send info to quick reply class
         // do not pull the extras if this is not an SMS
         // TODO: add MMS support later
@@ -1188,6 +1192,15 @@ public class MessagingNotification {
             }
         }
         nm.notify(NOTIFICATION_ID, notification);
+        
+        // Trigger the QuickMessage pop-up activity if enabled
+        // But don't show the QuickMessage if the user is in a call or the phone is ringing
+        if (qmPopupEnabled && quickReply != null) {
+            TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            if (tm.getCallState() == TelephonyManager.CALL_STATE_IDLE && !ConversationList.mIsRunning && !ComposeMessageActivity.mIsRunning) {
+                context.startActivity(quickReply);
+            }
+        }
     }
 
     private static Intent getReplyIntent(Context context,

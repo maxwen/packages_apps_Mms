@@ -82,6 +82,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     public static final String DISPLAY_QR_SMS_REPLY     = "pref_key_display_quickreply_sms_reply";
     public static final String DISPLAY_QR_DELETE        = "pref_key_display_quickreply_delete";
     public static final String DISPLAY_QR_MARK_READ     = "pref_key_display_quickreply_mark_read";
+    public static final String QUICKMESSAGE_ENABLED      = "pref_key_quickmessage";
 
     public static final String ENABLE_EMOJIS = "pref_key_enable_emojis";
     public static final String ENABLE_QUICK_EMOJIS      = "pref_key_emojis_quick";
@@ -113,6 +114,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     private CheckBoxPreference mQrSmsReply;
     private CheckBoxPreference mQrDelete;
     private CheckBoxPreference mQrMarkRead;
+    private CheckBoxPreference mEnableQuickMessagePref;
 
     @Override
     protected void onCreate(Bundle icicle) {
@@ -153,6 +155,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mQrSmsReply = (CheckBoxPreference) findPreference(DISPLAY_QR_SMS_REPLY);
         mQrDelete = (CheckBoxPreference) findPreference(DISPLAY_QR_DELETE);
         mQrMarkRead = (CheckBoxPreference) findPreference(DISPLAY_QR_MARK_READ);
+        mEnableQuickMessagePref = (CheckBoxPreference) findPreference(QUICKMESSAGE_ENABLED);
 
         // Get the MMS retrieval settings. Defaults to enabled with roaming disabled
         mMmsAutoRetrievialPref = (CheckBoxPreference) findPreference(AUTO_RETRIEVAL);
@@ -269,6 +272,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mQrSmsReply.setOnPreferenceClickListener(quickRepliesClickAction);
         mQrDelete.setOnPreferenceClickListener(quickRepliesClickAction);
         mQrMarkRead.setOnPreferenceClickListener(quickRepliesClickAction);
+        setEnabledQuickMessagePref();
 
         String soundValue = sharedPreferences.getString(NOTIFICATION_RINGTONE, null);
         setRingtoneSummary(soundValue);
@@ -304,6 +308,12 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         // The "enable notifications" setting is really stored in our own prefs. Read the
         // current value and set the checkbox to match.
         mEnableNotificationsPref.setChecked(getNotificationEnabled(this));
+    }
+
+    private void setEnabledQuickMessagePref() {
+        // The "enable quickmessage" setting is really stored in our own prefs. Read the
+        // current value and set the checkbox to match.
+        mEnableQuickMessagePref.setChecked(getQuickMessageEnabled(this));
     }
 
     private void setSmsDisplayLimit() {
@@ -366,6 +376,9 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         } else if (preference == mEnableNotificationsPref) {
             // Update the actual "enable notifications" value that is stored in secure settings.
             enableNotifications(mEnableNotificationsPref.isChecked(), this);
+        } else if (preference == mEnableQuickMessagePref) {
+            // Update the actual "enable quickmessage" value that is stored in secure settings.
+            enableQuickMessage(mEnableQuickMessagePref.isChecked(), this);
         } else if (preference == mMmsRetrievalDuringRoamingPref) {
             // Update the value in Settings.System
             Settings.System.putInt(getContentResolver(), Settings.System.MMS_AUTO_RETRIEVAL_ON_ROAMING,
@@ -446,6 +459,21 @@ public class MessagingPreferenceActivity extends PreferenceActivity
 
         editor.putBoolean(MessagingPreferenceActivity.NOTIFICATION_ENABLED, enabled);
 
+        editor.apply();
+    }
+
+    public static boolean getQuickMessageEnabled(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean quickMessageEnabled =
+            prefs.getBoolean(MessagingPreferenceActivity.QUICKMESSAGE_ENABLED, false);
+        return quickMessageEnabled;
+    }
+
+    public static void enableQuickMessage(boolean enabled, Context context) {
+        // Store the value of notifications in SharedPreferences
+        SharedPreferences.Editor editor =
+            PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putBoolean(MessagingPreferenceActivity.QUICKMESSAGE_ENABLED, enabled);
         editor.apply();
     }
 
