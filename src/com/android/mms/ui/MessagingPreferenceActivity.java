@@ -290,7 +290,12 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     private int getQuickReplyOptionsCount() {
         int count = 0;
         for (int i = 0; (mQuickReplyCat.getPreferenceCount() ) > i; i++) {
-            if (((CheckBoxPreference) mQuickReplyCat.getPreference(i)).isChecked()) {
+        	CheckBoxPreference pref=(CheckBoxPreference) mQuickReplyCat.getPreference(i);
+        	// dont count the popup pref
+        	if (pref.equals(mEnableQuickMessagePref)){
+        		continue;
+        	}
+            if (pref.isChecked()) {
                 count++;
             }
         }
