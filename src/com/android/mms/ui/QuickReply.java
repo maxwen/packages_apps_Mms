@@ -83,6 +83,7 @@ import java.util.Map;
 public class QuickReply extends Activity implements OnDismissListener, OnClickListener,
         OnMenuItemClickListener {
     private final String TAG = getClass().getSimpleName();
+
     Context mContext = this;
 
     private Bitmap avatar;
@@ -103,10 +104,12 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
     private TextView textBoxCounter;
     private EditText textBox;
     private KeyguardManager.KeyguardLock kl;
+    private PowerManager pm;
     private boolean typing;
     private boolean wasLocked = false;
     private boolean fromMulti = false;
     private boolean screenIsOff;
+    private boolean resumeSleep;
 
     private AlertDialog mSmileyDialog;
     private AlertDialog mEmojiDialog;
@@ -128,6 +131,12 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
         boolean isLocked = km.inKeyguardRestrictedInputMode();
 
         kl = km.newKeyguardLock("QuickReply");
+
+        // Used with kl to turn display off if qr was accessed from lockscreen
+        // Screen off -> check notif->use qr->relock->screen off
+        pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+
+        resumeSleep = MessagingPreferenceActivity.getResumeSleepFromQrEnabled(mContext);
 
         // make a BR for finding if the screen is on or off to help with
         // how onPause is handled to work more fluid
@@ -152,6 +161,7 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
         fromMulti = extras.getBoolean("from");
         boolean deleteSms = extras.getBoolean("needsDeleted", false);
         boolean markSmsRead = extras.getBoolean("makeAndClose", false);
+        boolean openSms = extras.getBoolean("needsOpened", false);
         boolean test = extras.getBoolean("test", false);
         nameContact = (TextView) mView.findViewById(R.id.contact_name);
         nameContact.setText(contactName);
@@ -401,6 +411,25 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
         nm.cancel(NOTIFICATION_ID);
     }
 
+    /**
+     * Open message of current quick reply dialog
+     * For those times when you just want to see the app without closing thread
+     */
+    private void openThread() {
+        ContentValues values = new ContentValues();
+        values.put("READ", 1);
+        values.put("SEEN", 1);
+
+        Intent openSms = new Intent(Intent.ACTION_VIEW,
+               Uri.parse("content://mms-sms/conversations/" + threadId));
+        startActivity(openSms);
+
+        // clear the notification
+        NotificationManager nm = (NotificationManager) mContext.getSystemService(
+                Context.NOTIFICATION_SERVICE);
+        nm.cancel(NOTIFICATION_ID);
+    }
+
     private void addMessageToSent(String messageSent) {
         ContentValues sentSms = new ContentValues();
         sentSms.put("address", phoneNumber);
@@ -433,6 +462,9 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
     public void onDestroy() {
         if (wasLocked) {
             kl.reenableKeyguard();
+            if(resumeSleep) {
+                pm.goToSleep(SystemClock.uptimeMillis());
+            }
         }
         if (fromMulti) {
             Intent i = new Intent();
@@ -545,6 +577,9 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
                 setRead();
                 finish();
                 return true;
+            case R.id.qr_menu_open:
+                openThread();
+                return true;
             case R.id.qr_menu_smiley:
                 showSmileyDialog();
                 return true;
@@ -572,6 +607,9 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
             case R.id.qr_menu_read:
                 setRead();
                 finish();
+                return true;
+            case R.id.qr_menu_open:
+                openThread();
                 return true;
             case R.id.qr_menu_smiley:
                 showSmileyDialog();

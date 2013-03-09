@@ -86,6 +86,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     public static final String QUICKMESSAGE_ENABLED      = "pref_key_quickmessage";
     public static final String ENABLE_EMOJIS            = "pref_key_enable_emojis";
     public static final String SOFTBANK_EMOJIS          = "pref_key_enable_softbank_encoding";
+    public static final String RESUME_SLEEP_FROM_QR     = "pref_key_resume_sleep_from_qr";
     public static final String ENABLE_QUICK_EMOJIS      = "pref_key_emojis_quick";
     public static final String STRIP_UNICODE            = "pref_key_strip_unicode";
     public static final String INPUT_TYPE               = "pref_key_mms_input_type";
@@ -128,6 +129,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     private CheckBoxPreference mQrDelete;
     private CheckBoxPreference mQrMarkRead;
     private CheckBoxPreference mEnableQuickMessagePref;
+    private CheckBoxPreference mQrResumeSleep;
 
     @Override
     protected void onCreate(Bundle icicle) {
@@ -169,8 +171,8 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mQrDelete = (CheckBoxPreference) findPreference(DISPLAY_QR_DELETE);
         mQrMarkRead = (CheckBoxPreference) findPreference(DISPLAY_QR_MARK_READ);
         mEnableQuickMessagePref = (CheckBoxPreference) findPreference(QUICKMESSAGE_ENABLED);
-
         mTextAreaSize = findPreference(PREF_TEXT_AREA_SIZE);
+        mQrResumeSleep = (CheckBoxPreference) findPreference(RESUME_SLEEP_FROM_QR);
 
         // Get the MMS retrieval settings. Defaults to enabled with roaming disabled
         mMmsAutoRetrievialPref = (CheckBoxPreference) findPreference(AUTO_RETRIEVAL);
@@ -558,6 +560,11 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         return MmsConfig.getGroupMmsEnabled() &&
                 groupMmsPrefOn &&
                 !TextUtils.isEmpty(MessageUtils.getLocalNumber());
+    }
+
+    public static boolean getResumeSleepFromQrEnabled(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(MessagingPreferenceActivity.RESUME_SLEEP_FROM_QR, false);
     }
 
     public static boolean getFullDateEnabled(Context context) {
