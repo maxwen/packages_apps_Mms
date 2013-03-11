@@ -89,6 +89,9 @@ public class TransactionSettings {
                 // Read values from APN settings
                 if (isValidApnType(cursor.getString(COLUMN_TYPE), PhoneConstants.APN_TYPE_MMS)) {
                     sawValidApn = true;
+                    if(cursor.getString(COLUMN_MMSC)==null){
+                    	continue;
+                    }
                     mServiceCenter = NetworkUtils.trimV4AddrZeros(
                             cursor.getString(COLUMN_MMSC).trim());
                     mProxyAddress = NetworkUtils.trimV4AddrZeros(
