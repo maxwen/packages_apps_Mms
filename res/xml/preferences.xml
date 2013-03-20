@@ -197,13 +197,17 @@
             android:persistent="false"
             android:title="@string/pref_text_area_size_title"
             android:summary="@string/pref_text_area_size_summary" />
-    </PreferenceCategory>
-    
-    <PreferenceCategory android:title="@string/pref_extra_settings">
+
     	<CheckBoxPreference android:key="pref_key_strip_unicode"
     	    android:title="@string/pref_title_strip_unicode"
     	    android:summary="@string/pref_summary_strip_unicode"
     	    android:defaultValue="false" />
+
+        <CheckBoxPreference
+            android:key="pref_easy_selector"
+            android:title="@string/pref_multi_select"
+            android:summary="@string/pref_multi_select_summary"
+            android:defaultValue="false" />
     </PreferenceCategory>
     
     <PreferenceCategory android:title="@string/pref_soft_keyboard_title">

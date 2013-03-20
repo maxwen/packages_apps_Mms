@@ -924,11 +924,11 @@
     <!-- Soft Keyboard Type -->
     <string name="pref_soft_keyboard_title">Keyboard</string>
     <string name="pref_title_input_type">Soft keyboard type</string>
+
     <string name="pref_summary_input_type">Select the soft keyboard to use when composing messages</string>
     <string name="pref_keyboard_emoji">Emoji</string>
     <string name="pref_keyboard_send">Enter to Send</string>
     <string name="pref_keyboard_new_line">Enter for a new line</string>
-    
 
    <!-- Breathing Notifications -->
    <string name="sms_breath">Breathing SMS</string>
@@ -937,4 +937,10 @@
     <!-- Text area -->
     <string name="pref_text_area_size_title">Text area size</string>
     <string name="pref_text_area_size_summary">Set text area to <xliff:g id="lines">%1$s</xliff:g> lines</string>
+
+    <!-- Multi Contact selector -->
+    <string name="pref_multi_select">Easy Selector</string>
+    <string name="pref_multi_select_summary">Select multiple contacts using a checkbox</string>
+    <string name="add_recipients">Add recipients</string>
+    <string name="add_recipients_positive_button">Add</string>
 </resources>

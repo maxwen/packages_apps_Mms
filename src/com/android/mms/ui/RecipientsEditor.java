@@ -279,6 +279,12 @@ public class RecipientsEditor extends RecipientEditTextView {
         }
     }
 
+    public void appendNumber(String number) {
+        Contact contact = Contact.get(number, true);
+        contact.setNumber(number);
+        append(contactToToken(contact) + ",");
+    }
+    
     private int pointToPosition(int x, int y) {
         // Check layout before getExtendedPaddingTop().
         // mLayout is used in getExtendedPaddingTop().
