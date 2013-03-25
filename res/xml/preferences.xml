@@ -194,7 +194,6 @@
             
         <Preference
             android:key="pref_text_area_size"
-            android:persistent="false"
             android:title="@string/pref_text_area_size_title"
             android:summary="@string/pref_text_area_size_summary" />
 
@@ -202,6 +201,13 @@
             android:key="pref_easy_selector"
             android:title="@string/pref_multi_select"
             android:summary="@string/pref_multi_select_summary"
+            android:defaultValue="false" />
+            
+        <CheckBoxPreference
+            android:key="pref_key_enable_softbank_encoding"
+            android:title="@string/pref_title_enable_softbank_encoding"
+            android:summary="@string/pref_summary_enable_softbank_encoding"
+            android:dependency="pref_key_enable_emojis"
             android:defaultValue="false" />
     </PreferenceCategory>
 
