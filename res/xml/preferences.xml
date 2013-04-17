@@ -191,6 +191,12 @@
             android:summary="@string/pref_summary_pref_key_emojis_quick"
             android:dependency="pref_key_enable_emojis"
             android:defaultValue="false" />
+            
+        <Preference
+            android:key="pref_text_area_size"
+            android:persistent="false"
+            android:title="@string/pref_text_area_size_title"
+            android:summary="@string/pref_text_area_size_summary" />
     </PreferenceCategory>
     
     <PreferenceCategory android:title="@string/pref_extra_settings">

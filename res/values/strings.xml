@@ -933,4 +933,8 @@
    <!-- Breathing Notifications -->
    <string name="sms_breath">Breathing SMS</string>
    <string name="sms_breath_summary">Will give your sms notifications a breathing effect in the statusbar.</string>
+
+    <!-- Text area -->
+    <string name="pref_text_area_size_title">Text area size</string>
+    <string name="pref_text_area_size_summary">Set text area to <xliff:g id="lines">%1$s</xliff:g> lines</string>
 </resources>

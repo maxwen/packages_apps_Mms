@@ -90,6 +90,12 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     public static final String STRIP_UNICODE            = "pref_key_strip_unicode";
     public static final String INPUT_TYPE               = "pref_key_mms_input_type";
 
+    // Text Area
+    private static final String PREF_TEXT_AREA_SIZE      = "pref_text_area_size";
+    public static final String TEXT_AREA_SIZE            = "text_area_size";
+    private static final int TEXT_AREA_LIMIT_MIN         = 2;
+    private static final int TEXT_AREA_LIMIT_MAX         = 15;
+
     // Menu entries
     private static final int MENU_RESTORE_DEFAULTS    = 1;
 
@@ -104,6 +110,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     private Preference mClearHistoryPref;
     private CheckBoxPreference mVibratePref;
     private CheckBoxPreference mBreathPref;
+    private Preference mTextAreaSize;
     private CheckBoxPreference mEnableNotificationsPref;
     private CheckBoxPreference mMmsAutoRetrievialPref;
     private CheckBoxPreference mMmsRetrievalDuringRoamingPref;
@@ -160,6 +167,8 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mQrDelete = (CheckBoxPreference) findPreference(DISPLAY_QR_DELETE);
         mQrMarkRead = (CheckBoxPreference) findPreference(DISPLAY_QR_MARK_READ);
         mEnableQuickMessagePref = (CheckBoxPreference) findPreference(QUICKMESSAGE_ENABLED);
+
+        mTextAreaSize = findPreference(PREF_TEXT_AREA_SIZE);
 
         // Get the MMS retrieval settings. Defaults to enabled with roaming disabled
         mMmsAutoRetrievialPref = (CheckBoxPreference) findPreference(AUTO_RETRIEVAL);
@@ -251,6 +260,9 @@ public class MessagingPreferenceActivity extends PreferenceActivity
 
         setEnabledNotificationsPref();
 
+        // Text Area
+        setTextAreaSummary();
+
         // If needed, migrate vibration setting from the previous tri-state setting stored in
         // NOTIFICATION_VIBRATE_WHEN to the boolean setting stored in NOTIFICATION_VIBRATE.
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -326,6 +338,24 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         mEnableQuickMessagePref.setChecked(getQuickMessageEnabled(this));
     }
 
+    private void setTextAreaSize(Context context, int value) {
+        SharedPreferences.Editor editPrefs =
+            PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editPrefs.putInt(TEXT_AREA_SIZE, value);
+        editPrefs.apply();
+    }
+
+    private int getTextAreaSize(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getInt(TEXT_AREA_SIZE, 3);
+    }
+
+    private void setTextAreaSummary() {
+        mTextAreaSize.setSummary(
+                getString(R.string.pref_text_area_size_summary,
+                        getTextAreaSize(this)));
+    }
+
     private void setSmsDisplayLimit() {
         mSmsLimitPref.setSummary(
                 getString(R.string.pref_summary_delete_limit,
@@ -386,6 +416,13 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         } else if (preference == mEnableNotificationsPref) {
             // Update the actual "enable notifications" value that is stored in secure settings.
             enableNotifications(mEnableNotificationsPref.isChecked(), this);
+        } else if (preference == mTextAreaSize) {
+            new NumberPickerDialog(this,
+                    mTextAreaSizeListener,
+                    getTextAreaSize(this),
+                    TEXT_AREA_LIMIT_MIN,
+                    TEXT_AREA_LIMIT_MAX,
+                    R.string.pref_text_area_size_title).show();
         } else if (preference == mEnableQuickMessagePref) {
             // Update the actual "enable quickmessage" value that is stored in secure settings.
             enableQuickMessage(mEnableQuickMessagePref.isChecked(), this);
@@ -428,6 +465,14 @@ public class MessagingPreferenceActivity extends PreferenceActivity
             public void onNumberSet(int limit) {
                 mMmsRecycler.setMessageLimit(MessagingPreferenceActivity.this, limit);
                 setMmsDisplayLimit();
+            }
+    };
+
+    NumberPickerDialog.OnNumberSetListener mTextAreaSizeListener =
+        new NumberPickerDialog.OnNumberSetListener() {
+            public void onNumberSet(int value) {
+                setTextAreaSize(MessagingPreferenceActivity.this, value);
+                setTextAreaSummary();
             }
     };
 
