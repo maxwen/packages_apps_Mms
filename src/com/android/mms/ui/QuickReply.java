@@ -37,6 +37,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.PowerManager;
+import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
@@ -91,6 +95,7 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
     private int messageType;
     private long messageId;
     private long threadId;
+    private Handler mHandler;
     private ImageButton sendReply;
     private ImageButton qrMenu;
     private TextView nameContact;
@@ -114,6 +119,8 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+
+        mHandler = new Handler();
 
         // find if the phone is on the lockscreen to allow dialog popup above it
         // if needed
@@ -202,6 +209,25 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
             alert.show();
         }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // keyboard seems to like initiating with less delay if focus requested
+        textBox.requestFocus();
+        mHandler.postDelayed(shouldKeyboardShow, 400);
+    }
+
+    final Runnable shouldKeyboardShow = new Runnable() {
+        public void run() {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(textBox, 0);
+            typing = true;
+            //ensure focus remains on textbox
+            textBox.requestFocus();
+        }
+    };
 
     private int deleteMessage() {
         Log.v(TAG, "attempting to delete uri: " + Uri.parse("content://sms/" + messageId));
@@ -481,6 +507,9 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
                 textBox.setText(text, TextView.BufferType.EDITABLE);
                 alert.setOnDismissListener(QuickReply.this);
                 alert.show();
+                // keyboard seems to like initiating with less delay if focus requested
+                textBox.requestFocus();
+                mHandler.postDelayed(shouldKeyboardShow, 100);
             }
         });
 
