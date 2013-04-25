@@ -381,6 +381,11 @@ public class ComposeMessageActivity extends Activity
         Log.d(TAG, logMsg);
     }
 
+    // easy selector
+    private int mReceipientsCount;
+    private boolean[] mReceipientsChecked;
+    private List<CharSequence[]> mReceipientsList; 
+    
     //==========================================================
     // Inner classes
     //==========================================================
@@ -3599,7 +3604,7 @@ public class ComposeMessageActivity extends Activity
             cursor.close();
             return null;
         }
-
+        
         final ArrayList<CharSequence[]> items = new ArrayList<CharSequence[]>(count);
 
         for (int i = 0; i < count; i++) {
@@ -3618,6 +3623,24 @@ public class ComposeMessageActivity extends Activity
         return items;
     }
 
+    private List<CharSequence[]> getFilteredContacts(List<CharSequence[]> data, int numberColumn) {
+        List<String> numbers = mRecipientsEditor.getUnfifiedNumbers();
+        HashSet<String> numberSet = new HashSet<String>();
+        numberSet.addAll(numbers);
+
+        List<CharSequence[]> filteredData = new ArrayList<CharSequence[]>();
+        for (int i = 0; i < data.size(); i++) {
+            String number = data.get(i)[numberColumn].toString().replaceAll(" ", "");
+            // dont add numbers that are already in the receipients list
+            if (numberSet.contains(number)){
+                continue;
+            }
+            filteredData.add(data.get(i));
+        }
+        
+        return filteredData;
+    }
+    
     private void launchRecipientsSelector() {
         final int displayNameColumn = 0;
         final int labelColumn = 1;
@@ -3629,14 +3652,15 @@ public class ComposeMessageActivity extends Activity
             return;
         }
 
-        final int count = data.size();
-        final CharSequence[] entries = new CharSequence[count];
-        for (int i = 0; i < count; i++) {
-            entries[i] = data.get(i)[displayNameColumn] + " - " + data.get(i)[labelColumn]
-                    + "\n" + data.get(i)[numberColumn];
-        }
-
-        final boolean[] numbersChecked = new boolean[entries.length];
+        mReceipientsList = getFilteredContacts(data, numberColumn);
+        mReceipientsCount = mReceipientsList.size();
+        mReceipientsChecked = new boolean[mReceipientsCount];
+        
+        CharSequence[] entries = new CharSequence[mReceipientsCount];
+        for (int i = 0; i < mReceipientsCount; i++) {
+            entries[i] = mReceipientsList.get(i)[displayNameColumn] + " - " + mReceipientsList.get(i)[labelColumn]
+                    + "\n" + mReceipientsList.get(i)[numberColumn];
+        } 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setIcon(R.drawable.ic_contact_picture);
@@ -3645,7 +3669,7 @@ public class ComposeMessageActivity extends Activity
         builder.setMultiChoiceItems(entries, null, new DialogInterface.OnMultiChoiceClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                numbersChecked[which] = isChecked;
+                mReceipientsChecked[which] = isChecked;
             }
         });
 
@@ -3653,9 +3677,9 @@ public class ComposeMessageActivity extends Activity
                 new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                for (int i = 0; i < count; i++) {
-                    if (numbersChecked[i]) {
-                        String number = data.get(i)[numberColumn].toString();                        
+                for (int i = 0; i < mReceipientsCount; i++) {
+                    if (mReceipientsChecked[i]) {
+                        String number = mReceipientsList.get(i)[numberColumn].toString();                        
                         mRecipientsEditor.appendNumber(number);
                     }
                 }
