@@ -21,6 +21,8 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.VibrationPickerDialog;
+import android.app.DialogFragment;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,8 +30,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.media.VibrationPattern;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -46,10 +51,12 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+import android.util.Log;
 import com.android.mms.MmsApp;
 import com.android.mms.MmsConfig;
 import com.android.mms.R;
 import com.android.mms.transaction.TransactionService;
+import com.android.mms.transaction.MessagingNotification;
 import com.android.mms.util.Recycler;
 
 import static android.preference.Preference.OnPreferenceClickListener;
@@ -70,6 +77,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     public static final String NOTIFICATION_ENABLED     = "pref_key_enable_notifications";
     public static final String NOTIFICATION_VIBRATE     = "pref_key_vibrate";
     public static final String NOTIFICATION_VIBRATE_WHEN= "pref_key_vibrateWhen";
+    public static final String NOTIFICATION_VIBRATE_TYPE= "pref_key_vibration_type";
     public static final String NOTIFICATION_RINGTONE    = "pref_key_ringtone";
     public static final String NOTIFICATION_BREATH      = "pref_key_sms_breath";
     public static final String AUTO_RETRIEVAL           = "pref_key_mms_auto_retrieval";
@@ -102,6 +110,10 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     // Menu entries
     private static final int MENU_RESTORE_DEFAULTS    = 1;
 
+	// vibration patterns
+    private static final int VIB_OK = 10;
+    private static final int VIB_CANCEL = 11;
+    
     private Preference mSmsLimitPref;
     private Preference mSmsDeliveryReportPref;
     private CheckBoxPreference mSmsSplitCounterPref;
@@ -112,6 +124,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     private Preference mManageSimPref;
     private Preference mClearHistoryPref;
     private CheckBoxPreference mVibratePref;
+    private Preference mVibrationTypePref;
     private CheckBoxPreference mBreathPref;
     private Preference mTextAreaSize;
     private CheckBoxPreference mEnableNotificationsPref;
@@ -131,6 +144,25 @@ public class MessagingPreferenceActivity extends PreferenceActivity
     private CheckBoxPreference mEnableQuickMessagePref;
     private CheckBoxPreference mQrResumeSleep;
 
+    private final Handler mVibrationPatternLookupComplete = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case VIB_OK:
+                    VibrationPattern mPattern = (VibrationPattern) msg.obj;
+                    if (mPattern == null) {
+                        break;
+                    }
+                    mVibrationTypePref.setSummary(mPattern.getName());
+                    MessagingNotification.setGlobalCustomVibrationURI(mPattern.getUri().toString());
+                    break;
+                case VIB_CANCEL:
+                default:
+                    break;
+            }
+        }
+    };
+    
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -185,6 +217,7 @@ public class MessagingPreferenceActivity extends PreferenceActivity
 
         mMmsAutoRetrievialPref = (CheckBoxPreference) findPreference(AUTO_RETRIEVAL);
         mVibratePref = (CheckBoxPreference) findPreference(NOTIFICATION_VIBRATE);
+        mVibrationTypePref = (Preference) findPreference(NOTIFICATION_VIBRATE_TYPE);
         mBreathPref = (CheckBoxPreference) findPreference(NOTIFICATION_BREATH);
         mRingtonePref = (RingtonePreference) findPreference(NOTIFICATION_RINGTONE);
 
@@ -443,6 +476,12 @@ public class MessagingPreferenceActivity extends PreferenceActivity
             if (checked) {
                 startMmsDownload();
             }
+        } else if (preference == mVibrationTypePref) {
+            String uriString = VibrationPattern.getPhoneVibration(getApplicationContext());
+            DialogFragment newFragment = VibrationPickerDialog.newInstance(mVibrationPatternLookupComplete, false,
+                        uriString);
+            newFragment.show(getFragmentManager(), "dialog");
+            return true;
         }
 
         return super.onPreferenceTreeClick(preferenceScreen, preference);

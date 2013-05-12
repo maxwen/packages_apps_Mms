@@ -188,6 +188,8 @@ public class MessagingNotification {
     private static final int MAX_MESSAGES_TO_SHOW = 8;  // the maximum number of new messages to
                                                         // show in a single notification.
 
+	private static String mGlobalCustomVibrationUriString;
+	
     private MessagingNotification() {
     }
 
@@ -922,6 +924,10 @@ public class MessagingNotification {
             //check for custom vibration pattern
             customVibration = getVibrationPattern(context, mostRecentNotification.mSender.getCustomVibrationUriString());
 
+			if (customVibration == null){
+            	customVibration = getVibrationPattern(context, mGlobalCustomVibrationUriString);
+			}
+			
             taskStackBuilder.addParentStack(ComposeMessageActivity.class);
             taskStackBuilder.addNextIntent(mostRecentNotification.mClickIntent);
         }
@@ -1671,5 +1677,9 @@ public class MessagingNotification {
             VibrationPattern mVibrationPattern = new VibrationPattern(mCustomVibrationUri, context);
             return mVibrationPattern.getPattern();
         }
+    }
+    
+    public static void setGlobalCustomVibrationURI(String uriString) {
+    	mGlobalCustomVibrationUriString = uriString;
     }
 }

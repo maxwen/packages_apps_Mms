@@ -365,6 +365,8 @@
     <string name="pref_title_notification_enabled">Notifications</string>
     <!-- Settings item for boolean option to vibrate during message notification -->
     <string name="pref_title_notification_vibrateWhen">Vibrate</string>
+    <!-- Settings item for default vibrate pattern -->
+    <string name="pref_title_notification_vibration_type">Message vibration</string>
     <!-- Settings item for entering ringtone selection screen -->
     <string name="pref_title_notification_ringtone">Sound</string>
     <!-- Settings item for setting the number of message to save for each conversation -->

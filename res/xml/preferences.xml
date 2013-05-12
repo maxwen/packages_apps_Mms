@@ -125,6 +125,10 @@
             android:dependency="pref_key_enable_notifications"
             android:defaultValue="false" />
 
+        <Preference android:key="pref_key_vibration_type"
+            android:title="@string/pref_title_notification_vibration_type"
+            android:dependency="pref_key_vibrate"/>
+            
         <CheckBoxPreference android:key="pref_key_sms_breath"
             android:title="@string/sms_breath"
             android:summary="@string/sms_breath_summary"
