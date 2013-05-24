@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.nio.charset.Charset;
@@ -3203,7 +3204,15 @@ public class ComposeMessageActivity extends Activity
 
     private void insertNumbersIntoRecipientsEditor(String[] numbers) {
         ContactList list = ContactList.getByNumbers(Arrays.asList(numbers), true);
-        mRecipientsEditor.populate(list);
+    	// only add new contacts
+    	ContactList existing=mRecipientsEditor.constructContactsFromInput(true);
+        Iterator<Contact> nextContact = list.iterator();
+        while (nextContact.hasNext()){
+        	Contact contact = nextContact.next();
+        	if (!existing.contains(contact)){
+        		mRecipientsEditor.appendContact(contact);
+        	}
+        }
     }
 
     private void processPickResult(final Intent data) {

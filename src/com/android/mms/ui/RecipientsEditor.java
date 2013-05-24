@@ -285,16 +285,10 @@ public class RecipientsEditor extends RecipientEditTextView {
         append(contactToToken(contact) + ",");
     }
 
-    // with removed " " in numbers
-    public List<String> getUnfifiedNumbers() {
-        List<String> numbers = getNumbers();
-        List<String> unifiedNumbers = new ArrayList<String>();
-        for (String c : numbers) {
-            unifiedNumbers.add(c.replaceAll(" ", ""));
-        }
-        return unifiedNumbers;
+    public void appendContact(Contact contact) {
+        append(contactToToken(contact) + ",");
     }
-        
+            
     private int pointToPosition(int x, int y) {
         // Check layout before getExtendedPaddingTop().
         // mLayout is used in getExtendedPaddingTop().
