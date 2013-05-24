@@ -17,6 +17,7 @@
 package com.android.mms.data;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -154,7 +155,12 @@ public class PhoneNumber {
             return false;
         }
     }
-
+    
+    @Override
+	public int hashCode() {
+		return mNumber.hashCode();
+	}
+	
     /**
      * Fill the specified phoneNumber with the values from the specified
      * cursor
@@ -186,7 +192,8 @@ public class PhoneNumber {
      */
     public static ArrayList<PhoneNumber> getPhoneNumbers(Context context) {
         ArrayList<PhoneNumber> phoneNumbers = new ArrayList<PhoneNumber>();
-
+		HashSet<PhoneNumber> addedNumbers = new HashSet<PhoneNumber>();
+		
         final String[] phonesProjection = new String[] {
             Phone._ID,
             Phone.NUMBER,
@@ -218,7 +225,11 @@ public class PhoneNumber {
         for (int i = 0; i < phonesCount; i++) {
             phonesCursor.moveToPosition(i);
             PhoneNumber recipient = new PhoneNumber(context, phonesCursor);
-            phoneNumbers.add(recipient);
+            
+            if (!addedNumbers.contains(recipient)){
+            	phoneNumbers.add(recipient);
+            	addedNumbers.add(recipient);
+            }
         }
 
         phonesCursor.close();
