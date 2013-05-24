@@ -275,7 +275,7 @@ public class AddRecipientsList extends ListActivity {
 
         // For each PhoneNumber, find its GID, and add it to correct Group
         int phoneNumbersCount = mPhoneNumbers.size();
-        int groupsCount = mGroups.size();
+        int groupsCount = mGroups!=null?mGroups.size():0;
 
         for (int i = 0; i < phoneNumbersCount; i++) {
             PhoneNumber phoneNumber = mPhoneNumbers.get(i);
