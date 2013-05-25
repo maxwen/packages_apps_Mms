@@ -93,7 +93,8 @@ public class Contact {
     private boolean mIsMe;          // true if this contact is me!
     private boolean mSendToVoicemail;   // true if this contact should not put up notification
     private String mCustomVibrationUriString;
-
+    private String mCustomNotificationUriString;
+    
     public interface UpdateListener {
         public void onUpdate(Contact updated);
     }
@@ -124,6 +125,7 @@ public class Contact {
         mIsStale = true;
         mSendToVoicemail = false;
         mCustomVibrationUriString = "";
+        mCustomNotificationUriString = "";
     }
     @Override
     public String toString() {
@@ -297,6 +299,10 @@ public class Contact {
         return mCustomVibrationUriString;
     }
 
+	public synchronized String getCustomNotificationUriString() {
+		return mCustomNotificationUriString;
+	}
+	
     public synchronized boolean existsInDatabase() {
         return (mPersonId > 0);
     }
@@ -431,7 +437,8 @@ public class Contact {
                 Phone.CONTACT_STATUS,           // 6
                 Phone.NORMALIZED_NUMBER,        // 7
                 Contacts.SEND_TO_VOICEMAIL,     // 8
-                Contacts.CUSTOM_VIBRATION       // 9
+                Contacts.CUSTOM_VIBRATION,      // 9
+                Contacts.CUSTOM_NOTIFICATION    // 10
         };
 
         private static final int PHONE_ID_COLUMN = 0;
@@ -444,7 +451,8 @@ public class Contact {
         private static final int PHONE_NORMALIZED_NUMBER = 7;
         private static final int SEND_TO_VOICEMAIL = 8;
         private static final int CUSTOM_VIBRATION_COLUMN = 9;
-
+        private static final int CUSTOM_NOTIFICATION_COLUMN = 10;
+        
         private static final String[] SELF_PROJECTION = new String[] {
                 Phone._ID,                      // 0
                 Phone.DISPLAY_NAME,             // 1
@@ -466,7 +474,8 @@ public class Contact {
                 Email.CONTACT_ID,             // 3
                 Phone.DISPLAY_NAME,           // 4
                 Contacts.SEND_TO_VOICEMAIL,   // 5
-                Contacts.CUSTOM_VIBRATION     // 6
+                Contacts.CUSTOM_VIBRATION,     // 6
+                Contacts.CUSTOM_NOTIFICATION     // 7
         };
         private static final int EMAIL_ID_COLUMN = 0;
         private static final int EMAIL_NAME_COLUMN = 1;
@@ -475,7 +484,8 @@ public class Contact {
         private static final int EMAIL_CONTACT_NAME_COLUMN = 4;
         private static final int EMAIL_SEND_TO_VOICEMAIL_COLUMN = 5;
         private static final int EMAIL_CUSTOM_VIBRATION_COLUMN = 6;
-
+        private static final int EMAIL_CUSTOM_NOTIFICATION_COLUMN = 7;
+        
         private final Context mContext;
 
         private final HashMap<String, ArrayList<Contact>> mContactsHash =
@@ -706,6 +716,12 @@ public class Contact {
                 return true;
             }
 
+            String oldNotiUriString = emptyIfNull(orig.mCustomNotificationUriString);
+            String newNotiUriString = emptyIfNull(newContactData.mCustomNotificationUriString);
+            if (!oldNotiUriString.equals(newNotiUriString)) {
+                return true;
+            }
+
             String oldName = emptyIfNull(orig.mName);
             String newName = emptyIfNull(newContactData.mName);
             if (!oldName.equals(newName)) {
@@ -759,7 +775,8 @@ public class Contact {
                     c.mName = entry.mName;
                     c.mSendToVoicemail = entry.mSendToVoicemail;
                     c.mCustomVibrationUriString = entry.mCustomVibrationUriString;
-
+                    c.mCustomNotificationUriString = entry.mCustomNotificationUriString;
+                    
                     c.notSynchronizedUpdateNameAndNumber();
 
                     // We saw a bug where we were updating an empty contact. That would trigger
@@ -929,11 +946,14 @@ public class Contact {
                 contact.mNumberE164 = cursor.getString(PHONE_NORMALIZED_NUMBER);
                 contact.mSendToVoicemail = cursor.getInt(SEND_TO_VOICEMAIL) == 1;
                 contact.mCustomVibrationUriString = cursor.getString(CUSTOM_VIBRATION_COLUMN);
+                contact.mCustomNotificationUriString = cursor.getString(CUSTOM_NOTIFICATION_COLUMN);
+                
                 if (Log.isLoggable(LogTag.CONTACT, Log.DEBUG)) {
                     log("fillPhoneTypeContact: name=" + contact.mName + ", number="
                             + contact.mNumber + ", presence=" + contact.mPresenceResId
                             + ", SendToVoicemail: " + contact.mSendToVoicemail
-                            + ", CustomVibration: " + contact.mCustomVibrationUriString);
+                            + ", CustomVibration: " + contact.mCustomVibrationUriString
+                            + ", CustomNotification; " + contact.mCustomNotificationUriString);
                 }
             }
             byte[] data = loadAvatarData(contact);
@@ -1043,6 +1063,9 @@ public class Contact {
                                     cursor.getInt(EMAIL_SEND_TO_VOICEMAIL_COLUMN) == 1;
                             entry.mCustomVibrationUriString =
                                     cursor.getString(EMAIL_CUSTOM_VIBRATION_COLUMN);
+                            entry.mCustomNotificationUriString =
+                                    cursor.getString(EMAIL_CUSTOM_NOTIFICATION_COLUMN);
+                                    
                             String name = cursor.getString(EMAIL_NAME_COLUMN);
                             if (TextUtils.isEmpty(name)) {
                                 name = cursor.getString(EMAIL_CONTACT_NAME_COLUMN);
