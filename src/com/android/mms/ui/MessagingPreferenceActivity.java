@@ -452,14 +452,16 @@ public class MessagingPreferenceActivity extends PreferenceActivity
                     mSmsRecycler.getMessageLimit(this),
                     mSmsRecycler.getMessageMinLimit(),
                     mSmsRecycler.getMessageMaxLimit(),
-                    R.string.pref_title_sms_delete).show();
+                    R.string.pref_title_sms_delete,
+                    R.string.pref_title_sms_delete_message).show();
         } else if (preference == mMmsLimitPref) {
             new NumberPickerDialog(this,
                     mMmsLimitListener,
                     mMmsRecycler.getMessageLimit(this),
                     mMmsRecycler.getMessageMinLimit(),
                     mMmsRecycler.getMessageMaxLimit(),
-                    R.string.pref_title_mms_delete).show();
+                    R.string.pref_title_mms_delete,
+                    R.string.pref_title_mms_delete_message).show();
 
         } else if (preference == mSmsMultiPartSizePref) {
             new NumberPickerDialog(this,
@@ -467,7 +469,8 @@ public class MessagingPreferenceActivity extends PreferenceActivity
                     getMultiPartSmsSize(this),
                     SMS_MULTI_PART_MIN,
                     SMS_MULTI_PART_MAX,
-                    R.string.pref_title_sms_multi_part).show();
+                    R.string.pref_title_sms_multi_part,
+                    R.string.pref_title_sms_multi_part_message).show();
 
         } else if (preference ==  mSmsMultiPartPref) {
             mSmsMultiPartPref.setChecked(mSmsMultiPartPref.isChecked());
@@ -487,7 +490,8 @@ public class MessagingPreferenceActivity extends PreferenceActivity
                     getTextAreaSize(this),
                     TEXT_AREA_LIMIT_MIN,
                     TEXT_AREA_LIMIT_MAX,
-                    R.string.pref_text_area_size_title).show();
+                    R.string.pref_text_area_size_title,
+                    R.string.pref_text_area_size_title_message).show();
         } else if (preference == mEnableQuickMessagePref) {
             // Update the actual "enable quickmessage" value that is stored in secure settings.
             enableQuickMessage(mEnableQuickMessagePref.isChecked(), this);

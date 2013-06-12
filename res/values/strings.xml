@@ -359,8 +359,12 @@
     <string name="pref_title_auto_delete">Delete old messages</string>
     <!-- Settings item for integer option to set SMS delete limit -->
     <string name="pref_title_sms_delete">Text message limit</string>
+    <!-- Settings item for setting the number of message to save for each conversation -->
+    <string name="pref_title_sms_delete_message">Set number of SMS messages to save</string>
     <!-- Settings item for integer option to set MMS delete limit -->
     <string name="pref_title_mms_delete">Multimedia message limit</string>
+    <!-- Settings item for setting the number of message to save for each conversation -->
+    <string name="pref_title_mms_delete_message">Set number of MMS messages to save</string>
     <!-- Settings item for boolean option to display message notifications -->
     <string name="pref_title_notification_enabled">Notifications</string>
     <!-- Settings item for boolean option to vibrate during message notification -->
@@ -946,6 +950,7 @@
 
     <!-- Text area -->
     <string name="pref_text_area_size_title">Text area size</string>
+    <string name="pref_text_area_size_title_message">Set text area lines</string>
     <string name="pref_text_area_size_summary">Set text area to <xliff:g id="lines">%1$s</xliff:g> lines</string>
 
     <!-- Multi Contact selector -->
@@ -971,6 +976,7 @@
 
     <!-- Multi-Part SMS -->
     <string name="pref_title_sms_multi_part">Multi-part SMS</string>
+    <string name="pref_title_sms_multi_part_message">Set number of segments</string>
     <string name="pref_title_sms_multi_part_size">Multi-part SMS size</string>
     <string name="pref_summary_sms_multi_part_mms">Text messages over 160 chars will be sent as MMS</string>
     <string name="pref_summary_sms_multi_part">Text messages over 160 chars will be sent as Multi-part SMS</string>

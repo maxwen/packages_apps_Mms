@@ -26,6 +26,7 @@ import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 
 import com.android.mms.R;
 
@@ -49,6 +50,7 @@ public class NumberPickerDialog extends AlertDialog implements OnClickListener {
 
     private final NumberPicker mNumberPicker;
     private final OnNumberSetListener mCallback;
+    private final TextView mTextView;
 
     /**
      * @param context Parent.
@@ -60,10 +62,11 @@ public class NumberPickerDialog extends AlertDialog implements OnClickListener {
             int number,
             int rangeMin,
             int rangeMax,
-            int title) {
+            int title,
+            int message) {
         this(context, context.getResources().getConfiguration().uiInvertedMode
                 == Configuration.UI_INVERTED_MODE_YES ? AlertDialog.THEME_HOLO_DARK
-                : AlertDialog.THEME_HOLO_LIGHT, callBack, number, rangeMin, rangeMax, title);
+                : AlertDialog.THEME_HOLO_LIGHT, callBack, number, rangeMin, rangeMax, title, message);
     }
 
     /**
@@ -78,7 +81,8 @@ public class NumberPickerDialog extends AlertDialog implements OnClickListener {
             int number,
             int rangeMin,
             int rangeMax,
-            int title) {
+            int title,
+            int message) {
         super(context, theme);
         mCallback = callBack;
 
@@ -101,6 +105,9 @@ public class NumberPickerDialog extends AlertDialog implements OnClickListener {
         mNumberPicker.setOnLongPressUpdateInterval(100); // make the repeat rate three times as fast
                                                          // as normal since the range is so large.
         mNumberPicker.setWrapSelectorWheel(false);       // don't wrap from min->max
+        
+        mTextView = (TextView) view.findViewById(R.id.message_view);
+        mTextView.setText(message);
     }
 
     public void onClick(DialogInterface dialog, int which) {
