@@ -373,7 +373,12 @@ public class MessagingPreferenceActivity extends PreferenceActivity
 
     private void setRingtoneSummary(String soundValue) {
         Uri soundUri = TextUtils.isEmpty(soundValue) ? null : Uri.parse(soundValue);
-        Ringtone tone = soundUri != null ? RingtoneManager.getRingtone(this, soundUri) : null;
+        // maxwen: getRingtone would return a profiles - modified value
+        // which is even wrong cause it would be the ringtone URI instead
+        // of the notification URI
+        // nowhere else a profile modified value is displayed
+        // e.g. vibrate or phone ringtone so it shoudldnt be also here
+        Ringtone tone = soundUri != null ? RingtoneManager.getRingtoneWithoutProfile(this, soundUri) : null;
         mRingtonePref.setSummary(tone != null ? tone.getTitle(this)
                 : getResources().getString(R.string.silent_ringtone));
     }
