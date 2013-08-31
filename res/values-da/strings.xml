@@ -398,6 +398,5 @@
     <string name="quick_reply_hint">Skriv besked</string>
     <string name="only_three_please">Vælg kun 3 ting af gangen</string>
     <string name="pref_title_quick_reply">Hurtigsvar</string>
-    <string name="pref_quickmessage">HurtigBesked</string>
     <string name="pref_quickmessage_title">Slå HurtigBesked til</string>
 </resources>
