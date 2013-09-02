@@ -253,60 +253,63 @@ public class AddRecipientsList extends ListActivity {
         mCheckedPhoneNumbers = new ArrayList<PhoneNumber>();
         mGroups = Group.getGroups(this);
         mGroupMemberships = GMembership.getGroupMemberships(this);
-
-        Map<Long,ArrayList<Long>> groupIdWithContactsId = new HashMap<Long, ArrayList<Long>>();
-
-        // Store GID with all its CIDs
-        int GMCount = mGroupMemberships.size();
-
-        for (int i = 0; i < GMCount; i++) {
-            GMembership groupMembership = mGroupMemberships.get(i);
-            Long gid = groupMembership.getGroupId();
-            Long uid = groupMembership.getContactId();
-
-            if (!groupIdWithContactsId.containsKey(gid)) {
-                groupIdWithContactsId.put(gid, new ArrayList<Long>());
-            }
-
-            if (!groupIdWithContactsId.get(gid).contains(uid)) {
-                groupIdWithContactsId.get(gid).add(uid);
-            }
-        }
-
-        // For each PhoneNumber, find its GID, and add it to correct Group
+		int GMCount = 0;
+        int groupsCount = 0;
         int phoneNumbersCount = mPhoneNumbers.size();
-        int groupsCount = mGroups!=null?mGroups.size():0;
+        
+        Map<Long,ArrayList<Long>> groupIdWithContactsId = new HashMap<Long, ArrayList<Long>>();
+        ArrayList<AddRecipientsListItem> items = new ArrayList<AddRecipientsListItem>();
+            
+		if (mGroups != null && mGroupMemberships != null){
+            // Store GID with all its CIDs
+            GMCount = mGroupMemberships.size();
 
-        for (int i = 0; i < phoneNumbersCount; i++) {
-            PhoneNumber phoneNumber = mPhoneNumbers.get(i);
-            long cid = phoneNumber.getContactId();
+            for (int i = 0; i < GMCount; i++) {
+                GMembership groupMembership = mGroupMemberships.get(i);
+                Long gid = groupMembership.getGroupId();
+                Long uid = groupMembership.getContactId();
+    
+                if (!groupIdWithContactsId.containsKey(gid)) {
+                    groupIdWithContactsId.put(gid, new ArrayList<Long>());
+                }
 
-            Iterator<Long> iterator = groupIdWithContactsId.keySet().iterator();
-            while (iterator.hasNext()) {
-                long gid = (Long)iterator.next();
-                if (groupIdWithContactsId.get(gid).contains(cid)) {
-                    for (int j = 0; j < groupsCount; j++) {
-                        Group group = mGroups.get(j);
-                        if (group.getId() == gid) {
-                            group.addPhoneNumber(phoneNumber);
-                            phoneNumber.addGroup(group);
+                if (!groupIdWithContactsId.get(gid).contains(uid)) {
+                    groupIdWithContactsId.get(gid).add(uid);
+                }
+            }
+
+            // For each PhoneNumber, find its GID, and add it to correct Group
+            groupsCount = mGroups.size();
+
+            for (int i = 0; i < phoneNumbersCount; i++) {
+                PhoneNumber phoneNumber = mPhoneNumbers.get(i);
+                long cid = phoneNumber.getContactId();
+
+                Iterator<Long> iterator = groupIdWithContactsId.keySet().iterator();
+                while (iterator.hasNext()) {
+                    long gid = (Long)iterator.next();
+                    if (groupIdWithContactsId.get(gid).contains(cid)) {
+                        for (int j = 0; j < groupsCount; j++) {
+                            Group group = mGroups.get(j);
+                            if (group.getId() == gid) {
+                                group.addPhoneNumber(phoneNumber);
+                                phoneNumber.addGroup(group);
+                            }
                         }
                     }
                 }
+            }  
+
+            for (int i = 0; i < groupsCount; i++) {
+                Group group = mGroups.get(i);
+                items.add(i, new AddRecipientsListItem(this, group));
             }
-        }
-
-        ArrayList<AddRecipientsListItem> items = new ArrayList<AddRecipientsListItem>();
-        for (int i = 0; i < groupsCount; i++) {
-            Group group = mGroups.get(i);
-            items.add(i, new AddRecipientsListItem(this, group));
-        }
-
+		}
         for (int i = 0; i < phoneNumbersCount; i++) {
             PhoneNumber phoneNumber = mPhoneNumbers.get(i);
             items.add(i + groupsCount, new AddRecipientsListItem(this, phoneNumber));
-        }
-
+        }		
+		
         mListAdapter = new AddRecipientsListAdapter(this, items);
         setListAdapter(mListAdapter);
     }
