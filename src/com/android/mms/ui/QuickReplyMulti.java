@@ -39,6 +39,10 @@ import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.text.style.TextAppearanceSpan;
 import android.util.Log;
+import android.os.SystemClock;
+import android.content.BroadcastReceiver;
+import android.os.PowerManager;
+import android.content.IntentFilter;
 
 import com.android.mms.LogTag;
 import com.android.mms.data.Contact;
@@ -67,9 +71,13 @@ public class QuickReplyMulti extends Activity implements OnDismissListener {
     private ArrayList<Long> keyArray;
     private String[] nameList;
     private boolean wasLocked = false;
-
+    private boolean screenIsOff;
+    private boolean resumeSleep;
+    private PowerManager pm;
+            
     private KeyguardManager.KeyguardLock kl;
-
+    private AlertDialog mAlert;
+    
     private static final Uri SMS_INBOX_URI = Uri.withAppendedPath(
             Uri.parse("content://sms"), "inbox");
 
@@ -108,6 +116,19 @@ public class QuickReplyMulti extends Activity implements OnDismissListener {
         boolean isLocked = km.inKeyguardRestrictedInputMode();
 
         final boolean markSmsRead = getIntent().getBooleanExtra("makeAndClose", false);
+
+        // Used with kl to turn display off if qr was accessed from lockscreen
+        // Screen off -> check notif->use qr->relock->screen off
+        pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+
+        resumeSleep = MessagingPreferenceActivity.getResumeSleepFromQrEnabled(mContext);
+
+        // make a BR for finding if the screen is on or off to help with
+        // how onPause is handled to work more fluid
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        registerReceiver(screenReceiver, filter);
 
         kl = km.newKeyguardLock("QuickReply");
 
@@ -202,7 +223,7 @@ public class QuickReplyMulti extends Activity implements OnDismissListener {
             }
         });
 
-        AlertDialog alert = b.create();
+        mAlert = b.create();
         if (isLocked) {
             kl.disableKeyguard();
             wasLocked = true;
@@ -214,9 +235,8 @@ public class QuickReplyMulti extends Activity implements OnDismissListener {
             }
             finish();
         }
-        alert.setOnDismissListener(this);
-        alert.show();
-
+        mAlert.setOnDismissListener(this);
+        mAlert.show();
     }
 
     private String[] getNoteNames() {
@@ -430,5 +450,45 @@ public class QuickReplyMulti extends Activity implements OnDismissListener {
     @Override
     public void onDismiss(DialogInterface dialog) {
         finish();
+    }
+
+    @Override
+    protected void onPause() {
+        KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        boolean isLocked = km.inKeyguardRestrictedInputMode();
+
+        if (!isLocked) {
+            if (!screenIsOff) {
+                mAlert.dismiss();
+                finish();
+            }
+        }
+        super.onPause();
+    }
+    
+    private BroadcastReceiver screenReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                screenIsOff = false;
+            } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                screenIsOff = true;
+            }
+        }
+    };
+    
+    @Override
+    public void onDestroy() {
+        if (wasLocked) {
+            kl.reenableKeyguard();
+            if(resumeSleep) {
+                pm.goToSleep(SystemClock.uptimeMillis());
+            }
+        }
+        unregisterReceiver(screenReceiver);
+        finish();
+        super.onDestroy();
     }
 }

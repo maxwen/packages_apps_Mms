@@ -116,7 +116,7 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
     private AlertDialog mEmojiDialog;
     private View mEmojiView;
 
-    private AlertDialog alert;
+    private AlertDialog mAlert;
 
     private static final int NOTIFICATION_ID = 123;
 
@@ -148,7 +148,7 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
 
         LayoutInflater inflater = LayoutInflater.from(this);
         final View mView = inflater.inflate(R.layout.quick_reply_sms, null);
-        alert = new AlertDialog.Builder(this).setView(mView).create();
+        mAlert = new AlertDialog.Builder(this).setView(mView).create();
 
         Bundle extras = getIntent().getExtras();
         avatar = (Bitmap) extras.get("avatar");
@@ -192,10 +192,10 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
         textBox.setOnClickListener(this);
         textBox.addTextChangedListener(mTextEditorWatcher);
         textBoxCounter = (TextView) mView.findViewById(R.id.text_counter);
-        alert.setOnDismissListener(this);
+        mAlert.setOnDismissListener(this);
         // set alert system to make sure it is always on top, permission
         // required.
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        mAlert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         if (isLocked) {
             kl.disableKeyguard();
             wasLocked = true;
@@ -221,7 +221,7 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
             }
             Log.v(TAG, "loading QuickReply dialog");
         } else {
-            alert.show();
+            mAlert.show();
         }
     }
 
@@ -446,13 +446,18 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
     public void onClick(View v) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         if (v == sendReply) {
-            if (typing) {
-                imm.hideSoftInputFromWindow(textBox.getWindowToken(), 0);
-                typing = false;
+            String message = null;
+            message = textBox.getText().toString();
+            if(message.length() > 0){
+                if (typing) {
+                    imm.hideSoftInputFromWindow(textBox.getWindowToken(), 0);
+                    typing = false;
+                }
+
+                sendSms();
+                String nyan = getResources().getString(R.string.quick_reply_sending);
+                Toast.makeText(this, nyan + ": " + contactName, Toast.LENGTH_SHORT).show();
             }
-            sendSms();
-            String nyan = getResources().getString(R.string.quick_reply_sending);
-            Toast.makeText(this, nyan + ": " + contactName, Toast.LENGTH_SHORT).show();
         } else if (v == textBox) {
             imm.showSoftInput(textBox, 0);
             typing = true;
@@ -493,6 +498,7 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
 
         if (!isLocked) {
             if (!screenIsOff) {
+                mAlert.dismiss();
                 finish();
             }
         }
@@ -501,64 +507,7 @@ public class QuickReply extends Activity implements OnDismissListener, OnClickLi
 
     @Override
     public void onDismiss(DialogInterface dialog) {
-        final Editable text = textBox.getText();
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle(R.string.qr_alert_title);
-        alert.setMessage(R.string.qr_alert_message);
-
-        alert.setPositiveButton(R.string.qr_alert_yes, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                finish();
-            }
-        });
-
-        alert.setNegativeButton(R.string.qr_alert_no, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-
-                LayoutInflater inflater = LayoutInflater.from(QuickReply.this);
-                final View mView = inflater.inflate(R.layout.quick_reply_sms, null);
-                AlertDialog alert = new AlertDialog.Builder(QuickReply.this).setView(mView)
-                        .create();
-
-                nameContact = (TextView) mView.findViewById(R.id.contact_name);
-                nameContact.setText(contactName);
-                prevText = (TextView) mView.findViewById(R.id.prev_text_body);
-                if (messageType == 1) {
-                    prevText.setText(replaceWithEmotes(textBodies));
-                } else {
-                    prevText.setText(replaceWithEmotes(textBody));
-                }
-                contactIcon = (ImageView) mView.findViewById(R.id.contact_avatar);
-                icon = null;
-                icon = getConactAvatar(avatar);
-                if (icon != null) {
-                    contactIcon.setBackgroundDrawable(icon);
-                } else {
-                    contactIcon.setBackgroundResource(R.drawable.ic_contact_picture);
-                }
-                sendReply = (ImageButton) mView.findViewById(R.id.reply_button);
-                sendReply.setOnClickListener(QuickReply.this);
-                qrMenu = (ImageButton) mView.findViewById(R.id.menu_button);
-                qrMenu.setOnClickListener(QuickReply.this);
-                textBox = (EditText) mView.findViewById(R.id.edit_box);
-                textBox.setOnClickListener(QuickReply.this);
-                textBox.setText(text, TextView.BufferType.EDITABLE);
-                alert.setOnDismissListener(QuickReply.this);
-                alert.show();
-                // keyboard seems to like initiating with less delay if focus requested
-                textBox.requestFocus();
-                mHandler.postDelayed(shouldKeyboardShow, 100);
-            }
-        });
-
-        alert.setNeutralButton(R.string.qr_alert_read, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                setRead();
-                finish();
-            }
-        });
-
-        alert.show();
+        finish();
     }
 
     /**
